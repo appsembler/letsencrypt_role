@@ -1,0 +1,29 @@
+{%- if letsencrypt_enable_default_server -%}
+  {%- set default_site = "default_server" -%}
+{%- else -%}
+  {%- set default_site = "" -%}
+{%- endif -%}
+
+server {
+    listen 80 {{ default_site }};
+    listen [::]:80 {{ default_site }};
+{% if letsencrypt_certs %}
+    server_name {{ letsencrypt_certs | sum(attribute='domains', start=[]) | join(' ') }};
+{% endif %}
+
+    location '/.well-known/acme-challenge' {
+        default_type "text/plain";
+        {% if letsencrypt_alternative_acme_folder == "" %}
+          root {{ letsencrypt_webroot }};
+        {% else %}
+          alias {{ letsencrypt_webroot }}/{{ letsencrypt_alternative_acme_folder }};
+        {% endif %}
+    }
+
+{% if letsencrypt_https_redirect %}
+    location / {
+        # Redirect to https
+        return 301 https://$host$request_uri;
+    }
+{% endif %}
+}

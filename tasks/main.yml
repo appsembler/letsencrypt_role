@@ -35,6 +35,17 @@
   become_user: "{{ letsencrypt_webuser }}"
   tags: ['letsencrypt', 'letsencrypt:configuration']
 
+- name: "Create acme challenges custom folder"
+  file:
+    state: directory
+    path: "{{ letsencrypt_alternative_acme_folder }}/"
+    owner: "{{ letsencrypt_webuser }}"
+    group: "{{ letsencrypt_webuser }}"
+  become: true
+  become_user: "{{ letsencrypt_webuser }}"
+  tags: ['letsencrypt', 'letsencrypt:configuration']
+
+
 # depending on the order that letsencrypt and nginx roles get run
 # on an initial deploy, there is a way that `/var/www` can end up
 # with restrictive permissions that prevent nginx from getting
